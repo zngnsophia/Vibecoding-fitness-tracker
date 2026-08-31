@@ -2,492 +2,508 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Моя неделя</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Силовой план</title>
 <style>
   :root{
-    --bg-1: #eef2fb;
-    --bg-2: #f7eef7;
-    --text: #1c1c1e;
-    --text-soft: rgba(28,28,30,0.5);
-    --text-faint: rgba(28,28,30,0.38);
-    --glass-fill: rgba(255,255,255,0.55);
-    --glass-fill-strong: rgba(255,255,255,0.72);
-    --glass-border: rgba(255,255,255,0.6);
-    --glass-shadow: rgba(31,38,73,0.10);
-    --accent: #0A84FF;
-    --accent-2: #5E5CE6;
-    --done: #34C759;
-    --done-soft: rgba(52,199,89,0.14);
-    --divider: rgba(60,60,67,0.1);
-    --today: #E2703F;
-    --today-soft: rgba(226,112,63,0.14);
-    --today-glow: rgba(226,112,63,0.35);
-    --pink: #FF5C8A;
-    --pink-bg: rgba(255,92,138,0.13);
-    --green: #8FCB3E;
-    --green-bg: rgba(143,203,62,0.16);
+    --bg:#F2F2F7;
+    --card:#FFFFFF;
+    --separator:rgba(60,60,67,0.29);
+    --label:#000000;
+    --secondary-label:#3C3C43;
+    --tertiary-label:rgba(60,60,67,0.6);
+    --blue:#007AFF;
+    --green:#34C759;
+    --orange:#FF9500;
   }
-  @media (prefers-color-scheme: dark){
-    :root{
-      --bg-1: #1c1c2a;
-      --bg-2: #221c2a;
-      --text: #f2f2f7;
-      --text-soft: rgba(242,242,247,0.55);
-      --text-faint: rgba(242,242,247,0.38);
-      --glass-fill: rgba(255,255,255,0.08);
-      --glass-fill-strong: rgba(255,255,255,0.12);
-      --glass-border: rgba(255,255,255,0.14);
-      --glass-shadow: rgba(0,0,0,0.35);
-      --accent: #0A84FF;
-      --accent-2: #7D7AFF;
-      --done: #30D158;
-      --done-soft: rgba(48,209,88,0.18);
-      --divider: rgba(255,255,255,0.08);
-      --today: #FF8F5E;
-      --today-soft: rgba(255,143,94,0.16);
-      --today-glow: rgba(255,143,94,0.4);
-      --pink: #FF6E9C;
-      --pink-bg: rgba(255,110,156,0.18);
-      --green: #A3DB55;
-      --green-bg: rgba(163,219,85,0.2);
-    }
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-  html, body{ height:100%; }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   body{
     margin:0;
-    font-family:'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--text);
-    background:
-      radial-gradient(120% 60% at 15% -10%, var(--bg-2) 0%, transparent 55%),
-      radial-gradient(120% 60% at 85% 0%, var(--bg-1) 0%, transparent 60%),
-      var(--bg-1);
-    min-height:100vh;
-    padding: env(safe-area-inset-top,16px) 14px calc(env(safe-area-inset-bottom,16px) + 40px);
+    background:var(--bg);
+    color:var(--label);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:50px;
   }
 
-  header{
+  .navbar{
+    position:sticky;
+    top:0;
+    z-index:10;
+    background:rgba(242,242,247,0.85);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    padding:8px 16px 6px;
+    border-bottom:0.5px solid var(--separator);
+  }
+  .nav-title{
+    font-size:13px;
+    font-weight:600;
+    color:var(--secondary-label);
     text-align:center;
-    margin: 10px 0 18px;
   }
-  header h1{
-    font-size: 22px;
-    font-weight: 700;
-    letter-spacing: -0.2px;
-    margin: 0 0 4px;
+  .large-title{
+    padding:4px 16px 12px;
+    font-size:34px;
+    font-weight:700;
+    letter-spacing:-0.02em;
   }
-  header p{
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-soft);
-    margin: 0;
-    letter-spacing: 0.1px;
-  }
-  #week-range{
-    font-weight: 600;
-    color: var(--text);
-  }
-  .dot-sep{
-    margin: 0 5px;
-    color: var(--text-faint);
+  .subtitle{
+    padding:0 16px 20px;
+    color:var(--secondary-label);
+    font-size:15px;
+    line-height:1.45;
+    max-width:520px;
   }
 
-  .commute-note{
-    max-width: 520px;
-    margin: 0 auto 16px;
-    padding: 11px 16px;
-    border-radius: 18px;
-    text-align:center;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-soft);
-    background: var(--glass-fill);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 20px -12px var(--glass-shadow);
-  }
-
-  .week{
-    max-width: 520px;
-    margin: 0 auto;
+  .schedule-strip{
     display:flex;
-    flex-direction:column;
-    gap: 12px;
+    gap:6px;
+    padding:0 16px 24px;
+    overflow-x:auto;
+  }
+  .sched-chip{
+    flex:1;
+    min-width:44px;
+    background:var(--card);
+    border-radius:10px;
+    padding:8px 3px 9px;
+    text-align:center;
+  }
+  .sched-chip.active{
+    background:var(--blue);
+  }
+  .sched-chip.muted{
+    background:transparent;
+  }
+  .sched-day{
+    font-size:11px;
+    color:var(--tertiary-label);
+    font-weight:600;
+  }
+  .sched-chip.muted .sched-day{color:#C7C7CC;}
+  .sched-chip.active .sched-day{color:rgba(255,255,255,0.75);}
+  .sched-label{
+    font-size:11px;
+    font-weight:600;
+    margin-top:3px;
+    line-height:1.2;
+    word-break:break-word;
+    hyphens:auto;
+  }
+  .sched-chip.muted .sched-label{color:#C7C7CC; font-weight:500;}
+  .sched-chip.active .sched-label{color:#fff;}
+
+  .progress-section{padding:0 16px 24px;}
+  .progress-card{
+    background:var(--card);
+    border-radius:14px;
+    padding:16px 18px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .ring{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    flex-shrink:0;
+    background:conic-gradient(var(--green) calc(var(--pct,0) * 1%), #E5E5EA 0);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .ring-inner{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:var(--card);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    font-weight:700;
+    color:var(--green);
+  }
+  .progress-text-title{font-size:15px; font-weight:600;}
+  .progress-text-sub{font-size:13px; color:var(--tertiary-label); margin-top:1px;}
+
+  .group{padding:0 16px 28px;}
+  .group-header{
+    font-size:13px;
+    font-weight:600;
+    color:var(--tertiary-label);
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    padding:0 4px 6px;
+  }
+  .group-list{
+    background:var(--card);
+    border-radius:14px;
+    overflow:hidden;
   }
 
-  .day{
-    border-radius: 22px;
-    padding: 14px 16px 12px;
-    background: var(--glass-fill);
-    backdrop-filter: blur(28px) saturate(160%);
-    -webkit-backdrop-filter: blur(28px) saturate(160%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 10px 28px -18px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.25);
-    position: relative;
-    transition: background 0.3s ease;
+  .row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 16px;
+    position:relative;
   }
-  .day.today{
-    background: linear-gradient(180deg, var(--today-soft) 0%, var(--glass-fill-strong) 70px);
-    box-shadow: 0 0 0 2.5px var(--today), 0 0 22px -4px var(--today-glow), 0 12px 30px -16px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.3);
+  .row + .row::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:16px;
+    right:0;
+    height:0.5px;
+    background:var(--separator);
   }
 
-  .day-head{
+  .day-row{cursor:pointer; user-select:none;}
+  .day-icon{
+    width:32px;
+    height:32px;
+    border-radius:8px;
+    background:var(--blue);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:15px;
+    flex-shrink:0;
+  }
+  .day-icon.optional{background:var(--orange);}
+  .day-row-text{flex:1; min-width:0;}
+  .day-row-title{font-size:16px; font-weight:500;}
+  .day-row-sub{font-size:13px; color:var(--tertiary-label); margin-top:1px;}
+  .disclosure{
+    color:#C7C7CC;
+    font-size:14px;
+    transition:transform 0.25s ease;
+    flex-shrink:0;
+  }
+  .day-group.open .disclosure{transform:rotate(90deg);}
+  .exercises-wrap{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.35s ease;
+    background:#FAFAFC;
+  }
+  .day-group.open .exercises-wrap{max-height:2000px;}
+
+  .ex-row{
+    padding:11px 16px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+  }
+  .ex-row + .ex-row{border-top:0.5px solid var(--separator);}
+
+  .ios-check{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:1.5px solid #C7C7CC;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .ios-check.checked{background:var(--green); border-color:var(--green);}
+  .ios-check svg{display:none; width:13px; height:13px;}
+  .ios-check.checked svg{display:block;}
+
+  .ex-main{flex:1; min-width:0;}
+  .ex-name{font-size:14.5px; font-weight:500;}
+  .ex-name.done{color:var(--tertiary-label); text-decoration:line-through;}
+  .ex-scheme{font-size:12.5px; color:var(--tertiary-label); margin-top:1px;}
+
+  .ex-weight{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    flex-shrink:0;
+    background:#EDEDF0;
+    border-radius:8px;
+    padding:4px 8px;
+  }
+  .ex-weight input{
+    width:32px;
+    background:transparent;
+    border:none;
+    color:var(--label);
+    font-size:13px;
+    text-align:right;
+    font-weight:600;
+  }
+  .ex-weight input:focus{outline:none;}
+  .ex-weight span{color:var(--tertiary-label); font-size:11.5px;}
+
+  .timer-row{
+    padding:12px 16px 16px;
+    border-top:0.5px solid var(--separator);
     display:flex;
     align-items:center;
     justify-content:space-between;
-    margin-bottom: 8px;
   }
-  .day-name{
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: -0.1px;
-    display:flex;
-    align-items:center;
-    gap: 7px;
-  }
-  .today-dot{
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--today);
-    box-shadow: 0 0 0 4px var(--today-soft);
-  }
-  .day-progress{
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--text-soft);
-    background: var(--glass-fill-strong);
-    padding: 3px 9px;
-    border-radius: 20px;
-    border: 1px solid var(--glass-border);
-  }
-  .day.today .day-progress{
-    color: var(--today);
-    border-color: var(--today-soft);
-  }
-
-  .items{
-    display:flex;
-    flex-direction:column;
-  }
-  .item{
-    display:flex;
-    align-items:center;
-    gap: 12px;
-    cursor:pointer;
-    user-select:none;
-    padding: 8px 4px;
-    border-bottom: 1px solid var(--divider);
-  }
-  .item:last-child{
-    border-bottom: none;
-  }
-
-  .check{
-    flex: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 1.6px solid rgba(120,120,140,0.35);
-    background: rgba(255,255,255,0.15);
-    position: relative;
-    transition: all 0.25s cubic-bezier(.4,0,.2,1);
-  }
-  .item.done .check{
-    border-color: transparent;
-    background: linear-gradient(135deg, var(--done), #30b552);
-    box-shadow: 0 2px 8px -1px var(--done-soft);
-    transform: scale(1.03);
-  }
-  .item.done .check::after{
-    content:"";
-    position:absolute;
-    left: 6.5px; top: 3px;
-    width: 5px; height: 9px;
-    border-right: 2px solid white;
-    border-bottom: 2px solid white;
-    transform: rotate(40deg);
-  }
-
-  .label{
-    font-size: 14.5px;
-    font-weight: 500;
-    line-height: 1.3;
-    flex: 1;
-    display:flex;
-    align-items:center;
-  }
-  .item.done .label{
-    color: var(--text-soft);
-  }
-
-  .cat-dot{
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    margin-right: 8px;
-    flex: none;
-  }
-  .cat-dot.sport{ background: var(--accent); }
-  .cat-dot.thesis{ background: var(--pink); }
-  .cat-dot.english{ background: var(--green); }
-
-  /* de-emphasized household / small tasks */
-  .item.cat-home .check{
-    width: 18px;
-    height: 18px;
-    border-width: 1.3px;
-    opacity: 0.75;
-  }
-  .item.cat-home .label{
-    font-size: 13px;
-    font-weight: 400;
-    color: var(--text-faint);
-  }
-  .item.cat-home.done .label{
-    color: var(--text-faint);
-  }
-  .item.cat-home.done .check{
-    background: linear-gradient(135deg, rgba(52,199,89,0.7), rgba(48,181,82,0.7));
-    box-shadow: none;
-  }
-
-  .tag{
-    display:inline-block;
-    font-size: 10px;
-    font-weight: 600;
-    border-radius: 8px;
-    padding: 2px 7px;
-    margin-left: 7px;
-    vertical-align: middle;
-    letter-spacing: 0.1px;
-  }
-  .tag.tag-english{ color: var(--green); background: var(--green-bg); }
-  .tag.tag-thesis{ color: var(--pink); background: var(--pink-bg); }
-
-  footer{
-    max-width: 520px;
-    margin: 20px auto 0;
-    text-align:center;
-  }
-  .reset-btn{
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--text-soft);
-    background: var(--glass-fill);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    border-radius: 22px;
-    padding: 9px 18px;
+  .timer-btn{
+    background:var(--blue);
+    color:#fff;
+    border:none;
+    border-radius:20px;
+    padding:8px 18px;
+    font-size:13.5px;
+    font-weight:600;
     cursor:pointer;
   }
-  .reset-btn:active{
-    transform: scale(0.97);
+  .timer-btn:active{opacity:0.7;}
+  .timer-btn.running{background:var(--orange);}
+  .timer-display{
+    font-variant-numeric:tabular-nums;
+    font-size:20px;
+    font-weight:600;
+    color:var(--secondary-label);
   }
 
-  .loading{
-    text-align:center;
-    color: var(--text-soft);
-    font-size: 13px;
-    font-weight: 500;
-    margin-top: 40px;
+  .note-list{padding:2px 4px 0;}
+  .note-item{
+    display:flex;
+    gap:10px;
+    padding:9px 12px;
+    font-size:13.5px;
+    color:var(--secondary-label);
+    line-height:1.4;
+  }
+  .note-dot{
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--blue);
+    margin-top:7px;
+    flex-shrink:0;
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Моя неделя</h1>
-  <p><span id="week-range"></span><span class="dot-sep">·</span><span id="week-progress">загрузка…</span></p>
-</header>
+<div class="navbar"><div class="nav-title">Тренировки</div></div>
+<div class="large-title">Силовой план</div>
+<div class="subtitle">Полное тело, 40–45 минут. Пн — тренировка А, Пт — тренировка Б. Тренировку В подключай по самочувствию, чередуя с А или Б.</div>
 
-<div class="commute-note">в дороге · испанский, подкасты</div>
+<div class="schedule-strip" id="scheduleStrip"></div>
 
-<div class="week" id="week"></div>
+<div class="progress-section">
+  <div class="progress-card">
+    <div class="ring" id="progressRing"><div class="ring-inner" id="progressPct">0%</div></div>
+    <div>
+      <div class="progress-text-title" id="progressLabel">0 из 18 упражнений</div>
+      <div class="progress-text-sub">Отмечено на этой неделе</div>
+    </div>
+  </div>
+</div>
 
-<footer>
-  <button class="reset-btn" id="reset-btn">Сбросить неделю</button>
-</footer>
+<div class="group">
+  <div class="group-header">Тренировки</div>
+  <div class="group-list" id="days"></div>
+</div>
+
+<div class="group">
+  <div class="group-header">Как использовать план</div>
+  <div class="group-list">
+    <div class="note-list">
+      <div class="note-item"><div class="note-dot"></div>Пн и Пт — силовая, Вт/Чт/Сб — бег, Вс — растяжка, Ср — отдых</div>
+      <div class="note-item"><div class="note-dot"></div>Вес указывай для себя, чтобы отслеживать прогрессию</div>
+      <div class="note-item"><div class="note-dot"></div>Если сет даётся легко — добавь 1–2 кг или 2 повторения</div>
+      <div class="note-item"><div class="note-dot"></div>Планка — по таймеру, остальное — по счёту повторений</div>
+    </div>
+  </div>
+</div>
 
 <script>
-// --- Telegram Mini App init ---
-const tg = window.Telegram ? window.Telegram.WebApp : null;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  try {
-    tg.setHeaderColor(tg.colorScheme === 'dark' ? '#1c1c2a' : '#eef2fb');
-    tg.setBackgroundColor(tg.colorScheme === 'dark' ? '#1c1c2a' : '#eef2fb');
-  } catch(e) {}
-}
-
-// --- Week date range ---
-function getWeekRangeLabel() {
-  const now = new Date();
-  const dow = now.getDay(); // 0 Sun..6 Sat
-  const diffToMonday = (dow === 0 ? -6 : 1 - dow);
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMonday);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-
-  const dayNum = d => d.toLocaleDateString('ru-RU', { day: 'numeric' });
-  const monthName = d => d.toLocaleDateString('ru-RU', { month: 'long' });
-
-  if (monthName(monday) === monthName(sunday)) {
-    return `${dayNum(monday)}–${dayNum(sunday)} ${monthName(sunday)}`;
-  }
-  return `${dayNum(monday)} ${monthName(monday)} – ${dayNum(sunday)} ${monthName(sunday)}`;
-}
-
-// --- Storage layer: Telegram CloudStorage with localStorage fallback ---
-const STORAGE_KEY = 'week-tracker-state';
-
-function storageGet() {
-  return new Promise(resolve => {
-    if (tg && tg.CloudStorage) {
-      tg.CloudStorage.getItem(STORAGE_KEY, (err, value) => {
-        if (err || !value) { resolve({}); return; }
-        try { resolve(JSON.parse(value)); } catch(e) { resolve({}); }
-      });
-    } else {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        resolve(raw ? JSON.parse(raw) : {});
-      } catch(e) { resolve({}); }
-    }
-  });
-}
-
-function storageSet(state) {
-  const raw = JSON.stringify(state);
-  return new Promise(resolve => {
-    if (tg && tg.CloudStorage) {
-      tg.CloudStorage.setItem(STORAGE_KEY, raw, () => resolve());
-    } else {
-      try { localStorage.setItem(STORAGE_KEY, raw); } catch(e) {}
-      resolve();
-    }
-  });
-}
-
-// --- Data ---
-// cat: 'sport' (голубой) | 'thesis' (розовый — диссертация/портфолио) | 'english' (салатовый) | 'home' (блёклый)
-const DAYS = [
-  { key: 'mon', name: 'Понедельник', items: [
-    { id:'run', label:'Бег', cat:'sport' },
-    { id:'eng', label:'Английский', tag:'к экзамену', cat:'english' },
-    { id:'small', label:'Мелкие задачи', cat:'home' },
-  ]},
-  { key: 'tue', name: 'Вторник', items: [
-    { id:'cardio', label:'Кардио-тренировка', cat:'sport' },
-    { id:'hair', label:'Мыть голову', cat:'home' },
-    { id:'thesis', label:'Диссертация', cat:'thesis' },
-  ]},
-  { key: 'wed', name: 'Среда', items: [
-    { id:'thesis', label:'Диссертация', cat:'thesis' },
-    { id:'small', label:'Мелкие задачи', cat:'home' },
-  ]},
-  { key: 'thu', name: 'Четверг', items: [
-    { id:'run', label:'Бег', cat:'sport' },
-    { id:'eng', label:'Английский', tag:'к экзамену', cat:'english' },
-  ]},
-  { key: 'fri', name: 'Пятница', items: [
-    { id:'cardio', label:'Кардио-тренировка', cat:'sport' },
-    { id:'thesis', label:'Диссертация', cat:'thesis' },
-  ]},
-  { key: 'sat', name: 'Суббота', items: [
-    { id:'longrun', label:'Длинная пробежка', cat:'sport' },
-    { id:'hair', label:'Мыть голову', cat:'home' },
-    { id:'clean', label:'Уборка', cat:'home' },
-    { id:'thesis', label:'Диссертация', cat:'thesis' },
-    { id:'small', label:'Мелкие задачи', cat:'home' },
-  ]},
-  { key: 'sun', name: 'Воскресенье', items: [
-    { id:'rest', label:'Прогулка', cat:'home' },
-    { id:'portfolio', label:'Портфолио', tag:'1 проект', cat:'thesis' },
-  ]},
+const SCHEDULE = [
+  {day:'ПН', label:'Силовая А', active:true},
+  {day:'ВТ', label:'Бег', active:false},
+  {day:'СР', label:'Отдых', active:false, muted:true},
+  {day:'ЧТ', label:'Бег', active:false},
+  {day:'ПТ', label:'Силовая Б', active:true},
+  {day:'СБ', label:'Бег', active:false},
+  {day:'ВС', label:'Растяжка', active:false, muted:true},
 ];
 
-const JS_TO_KEY = ['sun','mon','tue','wed','thu','fri','sat'];
-const todayKey = JS_TO_KEY[new Date().getDay()];
+const DAYS = [
+  {
+    letter: 'A',
+    title: 'Тренировка А',
+    sub: 'Понедельник',
+    exercises: [
+      {name:'Приседания с весом', scheme:'4 подхода × 12 повт'},
+      {name:'Выпады шагающие', scheme:'3 подхода × 12 повт на ногу'},
+      {name:'Отжимания', scheme:'4 подхода × 10–12 повт'},
+      {name:'Тяга гантели в наклоне', scheme:'3 подхода × 12 повт'},
+      {name:'Планка', scheme:'3 подхода × 40–60 сек', timer:50},
+      {name:'Ягодичный мостик с весом', scheme:'3 подхода × 15 повт'},
+    ]
+  },
+  {
+    letter: 'Б',
+    title: 'Тренировка Б',
+    sub: 'Пятница',
+    exercises: [
+      {name:'Румынская тяга с гантелями', scheme:'4 подхода × 12 повт'},
+      {name:'Жим гантелей стоя/сидя', scheme:'3 подхода × 12 повт'},
+      {name:'Присед-плие', scheme:'3 подхода × 15 повт'},
+      {name:'Скручивания на пресс', scheme:'3 подхода × 15 повт'},
+      {name:'Боковая планка', scheme:'3 подхода × 30 сек на сторону', timer:30},
+      {name:'Скакалка или берпи', scheme:'3 подхода × 20 сек'},
+    ]
+  },
+  {
+    letter: 'В',
+    title: 'Тренировка В',
+    sub: 'Опционально — чередуй с А или Б',
+    optional: true,
+    exercises: [
+      {name:'Становая тяга на прямых ногах', scheme:'4 подхода × 10 повт'},
+      {name:'Жим от груди лёжа/на полу', scheme:'3 подхода × 12 повт'},
+      {name:'Болгарские выпады', scheme:'3 подхода × 10 повт на ногу'},
+      {name:'Тяга к поясу', scheme:'3 подхода × 12 повт'},
+      {name:'Планка с подъёмом ноги', scheme:'3 подхода × 10 повт на сторону'},
+      {name:'Пресс велосипед', scheme:'3 подхода × 20 повт'},
+    ]
+  }
+];
 
-let state = {};
+const stripEl = document.getElementById('scheduleStrip');
+SCHEDULE.forEach(s => {
+  const chip = document.createElement('div');
+  chip.className = 'sched-chip' + (s.active ? ' active' : '') + (s.muted ? ' muted' : '');
+  chip.innerHTML = `<div class="sched-day">${s.day}</div><div class="sched-label">${s.label}</div>`;
+  stripEl.appendChild(chip);
+});
 
-function itemKey(dayKey, itemId) {
-  return dayKey + ':' + itemId;
-}
+const daysEl = document.getElementById('days');
+let totalEx = 0;
 
-function render() {
-  const week = document.getElementById('week');
-  week.innerHTML = '';
-  let totalDone = 0, totalItems = 0;
+DAYS.forEach((day, di) => {
+  totalEx += day.exercises.length;
 
-  DAYS.forEach(day => {
-    const dayEl = document.createElement('div');
-    dayEl.className = 'day' + (day.key === todayKey ? ' today' : '');
+  const dayGroup = document.createElement('div');
+  dayGroup.className = 'day-group';
 
-    const doneCount = day.items.filter(it => state[itemKey(day.key, it.id)]).length;
-    totalDone += doneCount;
-    totalItems += day.items.length;
+  const row = document.createElement('div');
+  row.className = 'row day-row';
+  row.innerHTML = `
+    <div class="day-icon${day.optional ? ' optional' : ''}">${day.letter}</div>
+    <div class="day-row-text">
+      <div class="day-row-title">${day.title}</div>
+      <div class="day-row-sub">${day.sub}</div>
+    </div>
+    <div class="disclosure">›</div>
+  `;
+  row.addEventListener('click', () => dayGroup.classList.toggle('open'));
 
-    const head = document.createElement('div');
-    head.className = 'day-head';
-    const nameHtml = day.key === todayKey
-      ? `<span class="day-name">${day.name}<span class="today-dot"></span></span>`
-      : `<span class="day-name">${day.name}</span>`;
-    head.innerHTML = `${nameHtml}<span class="day-progress">${doneCount}/${day.items.length}</span>`;
-    dayEl.appendChild(head);
+  const wrap = document.createElement('div');
+  wrap.className = 'exercises-wrap';
 
-    const itemsEl = document.createElement('div');
-    itemsEl.className = 'items';
+  day.exercises.forEach((ex, ei) => {
+    const exRow = document.createElement('div');
+    exRow.className = 'ex-row';
 
-    day.items.forEach(it => {
-      const key = itemKey(day.key, it.id);
-      const done = !!state[key];
-      const row = document.createElement('div');
-      row.className = 'item cat-' + it.cat + (done ? ' done' : '');
-      const dotHtml = (it.cat === 'sport' || it.cat === 'thesis' || it.cat === 'english')
-        ? `<span class="cat-dot ${it.cat}"></span>` : '';
-      const tagHtml = it.tag ? `<span class="tag tag-${it.cat}">${it.tag}</span>` : '';
-      row.innerHTML = `<span class="check"></span><span class="label">${dotHtml}${it.label}${tagHtml}</span>`;
-      row.addEventListener('click', async () => {
-        state[key] = !state[key];
-        if (tg && tg.HapticFeedback) {
-          try { tg.HapticFeedback.impactOccurred('light'); } catch(e) {}
-        }
-        await storageSet(state);
-        render();
-      });
-      itemsEl.appendChild(row);
+    const check = document.createElement('div');
+    check.className = 'ios-check';
+    check.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+    const main = document.createElement('div');
+    main.className = 'ex-main';
+    main.innerHTML = `
+      <div class="ex-name" id="name-${di}-${ei}">${ex.name}</div>
+      <div class="ex-scheme">${ex.scheme}</div>
+    `;
+
+    const weight = document.createElement('div');
+    weight.className = 'ex-weight';
+    weight.innerHTML = `<input type="number" placeholder="—" min="0"><span>кг</span>`;
+
+    check.addEventListener('click', () => {
+      check.classList.toggle('checked');
+      document.getElementById(`name-${di}-${ei}`).classList.toggle('done', check.classList.contains('checked'));
+      updateProgress();
     });
 
-    dayEl.appendChild(itemsEl);
-    week.appendChild(dayEl);
+    exRow.appendChild(check);
+    exRow.appendChild(main);
+    exRow.appendChild(weight);
+    wrap.appendChild(exRow);
+
+    if (ex.timer) {
+      const tRow = document.createElement('div');
+      tRow.className = 'timer-row';
+      const display = document.createElement('div');
+      display.className = 'timer-display';
+      display.textContent = formatTime(ex.timer);
+
+      let remaining = ex.timer;
+      let interval = null;
+
+      const btn = document.createElement('button');
+      btn.className = 'timer-btn';
+      btn.textContent = 'Старт';
+      btn.addEventListener('click', () => {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+          btn.textContent = 'Старт';
+          btn.classList.remove('running');
+          remaining = ex.timer;
+          display.textContent = formatTime(remaining);
+          return;
+        }
+        btn.textContent = 'Стоп';
+        btn.classList.add('running');
+        interval = setInterval(() => {
+          remaining--;
+          display.textContent = formatTime(remaining);
+          if (remaining <= 0) {
+            clearInterval(interval);
+            interval = null;
+            btn.textContent = 'Старт';
+            btn.classList.remove('running');
+            remaining = ex.timer;
+            display.textContent = formatTime(remaining);
+          }
+        }, 1000);
+      });
+
+      tRow.appendChild(display);
+      tRow.appendChild(btn);
+      wrap.appendChild(tRow);
+    }
   });
 
-  document.getElementById('week-progress').textContent = `${totalDone} из ${totalItems} выполнено`;
+  dayGroup.appendChild(row);
+  dayGroup.appendChild(wrap);
+  daysEl.appendChild(dayGroup);
+});
+
+if (DAYS[0]) daysEl.children[0].classList.add('open');
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${sec.toString().padStart(2,'0')}`;
 }
 
-document.getElementById('reset-btn').addEventListener('click', async () => {
-  state = {};
-  await storageSet(state);
-  render();
-});
-
-document.getElementById('week-range').textContent = getWeekRangeLabel();
-document.getElementById('week').innerHTML = '<div class="loading">загрузка…</div>';
-storageGet().then(saved => {
-  state = saved;
-  render();
-});
+function updateProgress() {
+  const checked = document.querySelectorAll('.ios-check.checked').length;
+  const pct = Math.round((checked / totalEx) * 100);
+  document.getElementById('progressRing').style.setProperty('--pct', pct);
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressLabel').textContent = `${checked} из ${totalEx} упражнений`;
+}
 </script>
 
 </body>
