@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>План тренировок</title>
+<style>
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    background:#FFFFFF;
+    display:flex;
+    justify-content:center;
+  }
+  .app-shell{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    padding:18px 20px 60px;
+  }
+
+  /* Top bar */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:6px 0 22px;
+  }
+  .icon-btn{
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:none;
+    border:none;
+    color:#111;
+    cursor:pointer;
+    padding:0;
+  }
+  .page-title{
+    font-size:30px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    color:#111;
+  }
+
+  /* Date strip */
+  .date-strip{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    padding:4px 2px 26px;
+  }
+  .date-circle{
+    flex:0 0 auto;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    border:1.5px solid #E3E3E7;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    position:relative;
+  }
+  .date-num{font-size:17px; font-weight:800; color:#111; line-height:1;}
+  .date-let{font-size:11px; font-weight:600; color:#9A9AA0; margin-top:3px;}
+  .date-circle.selected{background:#111; border-color:#111;}
+  .date-circle.selected .date-num{color:#fff;}
+  .date-circle.selected .date-let{color:rgba(255,255,255,0.65);}
+  .date-circle.is-today:not(.selected)::after{
+    content:"";
+    position:absolute;
+    bottom:5px;
+    width:4px; height:4px;
+    border-radius:50%;
+    background:#111;
+  }
+
+  /* Cards */
+  .card{
+    background:#F1F1F5;
+    border-radius:26px;
+    padding:20px 20px;
+    margin-bottom:14px;
+  }
+  .card.dim{background:#F7F7F9;}
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .card-icon{
+    width:40px; height:40px;
+    border-radius:50%;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    color:#111;
+  }
+  .card.dim .card-icon{color:#B5B5BA;}
+  .card-text{flex:1; min-width:0;}
+  .card-title{font-size:18px; font-weight:800; color:#111; letter-spacing:-0.01em;}
+  .card.dim .card-title{color:#9A9AA0;}
+  .card-sub{font-size:13px; color:#8A8A90; margin-top:2px;}
+
+  .check-circle{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:1.5px solid #C7C7CC;
+    background:#fff;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .check-circle.checked{background:#111; border-color:#111;}
+  .check-circle svg{display:none; width:15px; height:15px;}
+  .check-circle.checked svg{display:block;}
+
+  .card-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.4s ease;
+  }
+  .card.open .card-body{max-height:1600px; margin-top:16px;}
+
+  .ex-row{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:11px 0;
+    border-top:1px solid #E3E3E8;
+  }
+  .ex-check{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:1.5px solid #C7C7CC;
+    background:#fff;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .ex-check.checked{background:#111; border-color:#111;}
+  .ex-check svg{display:none; width:12px; height:12px;}
+  .ex-check.checked svg{display:block;}
+  .ex-main{flex:1; min-width:0;}
+  .ex-name{font-size:14.5px; font-weight:600; color:#111;}
+  .ex-name.done{color:#B0B0B5; text-decoration:line-through;}
+  .ex-scheme{font-size:12.5px; color:#9A9AA0; margin-top:1px;}
+  .ex-weight{
+    display:flex; align-items:center; gap:3px;
+    background:#fff; border-radius:8px; padding:4px 8px; flex-shrink:0;
+  }
+  .ex-weight input{width:30px; border:none; background:transparent; font-size:13px; font-weight:700; text-align:right; color:#111;}
+  .ex-weight input:focus{outline:none;}
+  .ex-weight span{font-size:11px; color:#9A9AA0;}
+
+  .timer-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 0 4px;
+    border-top:1px solid #E3E3E8;
+  }
+  .timer-btn{
+    background:#111; color:#fff; border:none; border-radius:20px;
+    padding:8px 18px; font-size:13.5px; font-weight:700; cursor:pointer;
+  }
+  .timer-btn.running{background:#FF6B4A;}
+  .timer-display{font-variant-numeric:tabular-nums; font-size:19px; font-weight:700; color:#111;}
+
+  .section-label{
+    font-size:12px; font-weight:700; color:#B0B0B5;
+    text-transform:uppercase; letter-spacing:0.05em;
+    padding:4px 6px 10px;
+  }
+
+  .note-list{padding:2px 2px 0;}
+  .note-item{display:flex; gap:9px; padding:8px 0; font-size:13.5px; color:#5A5A60; line-height:1.4;}
+  .note-dot{width:5px; height:5px; border-radius:50%; background:#B0B0B5; margin-top:7px; flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="topbar">
+    <button class="icon-btn" aria-label="Меню">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+    </button>
+    <div class="page-title" id="pageTitle">Тренировки</div>
+    <button class="icon-btn" id="resetBtn" aria-label="Сбросить">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 2.6 6.3"/><polyline points="3 21 3 15 9 15"/></svg>
+    </button>
+  </div>
+
+  <div class="date-strip" id="dateStrip"></div>
+
+  <div id="mainCardWrap"></div>
+
+  <div class="section-label">Дополнительно</div>
+  <div class="card" id="optionalCard"></div>
+
+  <div class="section-label">Как использовать план</div>
+  <div class="card dim">
+    <div class="note-list">
+      <div class="note-item"><div class="note-dot"></div>Пн и Пт — силовая, Вт/Чт/Сб — бег, Вс — растяжка, Ср — отдых</div>
+      <div class="note-item"><div class="note-dot"></div>Вес указывай для себя, чтобы отслеживать прогрессию</div>
+      <div class="note-item"><div class="note-dot"></div>Если сет даётся легко — добавь 1–2 кг или 2 повторения</div>
+      <div class="note-item"><div class="note-dot"></div>Планка — по таймеру, остальное — по счёту повторений</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ICONS = {
+  strength: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4 6.4 17.6 17.6"/><path d="M4 8 8 4"/><path d="M16 20l4-4"/><path d="M2.5 6.5l2 2"/><path d="M15.5 19.5l2 2"/><path d="M18 6l2-2"/><path d="M4.5 17.5l-2 2"/></svg>`,
+  run: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 12 7 12 10 5 14 19 17 12 21 12"/></svg>`,
+  rest: `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20 14.3A8.3 8.3 0 0 1 9.7 4a8.3 8.3 0 1 0 10.3 10.3Z"/></svg>`,
+  stretch: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c-4-1-7-4-7-9 0-4 2-8 7-9 1 4 1 8 4 10 2 1.5 3 3.5 3 5"/></svg>`,
+};
+const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+const WEEK = [
+  {key:'mon', short:'Пн', type:'strength', title:'Тренировка А', sub:'Полное тело · 40–45 мин',
+    exercises:[
+      {name:'Приседания с весом', scheme:'4 подхода × 12 повт'},
+      {name:'Выпады шагающие', scheme:'3 подхода × 12 повт на ногу'},
+      {name:'Отжимания', scheme:'4 подхода × 10–12 повт'},
+      {name:'Тяга гантели в наклоне', scheme:'3 подхода × 12 повт'},
+      {name:'Планка', scheme:'3 подхода × 40–60 сек', timer:50},
+      {name:'Ягодичный мостик с весом', scheme:'3 подхода × 15 повт'},
+    ]},
+  {key:'tue', short:'Вт', type:'run', title:'Бег', sub:'Лёгкий бег'},
+  {key:'wed', short:'Ср', type:'rest', title:'Отдых', sub:'Восстановление'},
+  {key:'thu', short:'Чт', type:'run', title:'Бег', sub:'Интервалы / темповый'},
+  {key:'fri', short:'Пт', type:'strength', title:'Тренировка Б', sub:'Полное тело · 40–45 мин',
+    exercises:[
+      {name:'Румынская тяга с гантелями', scheme:'4 подхода × 12 повт'},
+      {name:'Жим гантелей стоя/сидя', scheme:'3 подхода × 12 повт'},
+      {name:'Присед-плие', scheme:'3 подхода × 15 повт'},
+      {name:'Скручивания на пресс', scheme:'3 подхода × 15 повт'},
+      {name:'Боковая планка', scheme:'3 подхода × 30 сек на сторону', timer:30},
+      {name:'Скакалка или берпи', scheme:'3 подхода × 20 сек'},
+    ]},
+  {key:'sat', short:'Сб', type:'run', title:'Бег', sub:'Длинная дистанция'},
+  {key:'sun', short:'Вс', type:'stretch', title:'Растяжка', sub:'Мобильность и восстановление'},
+];
+
+const OPTIONAL = {
+  title:'Тренировка В', sub:'Опционально — чередуй с А или Б', type:'strength',
+  exercises:[
+    {name:'Становая тяга на прямых ногах', scheme:'4 подхода × 10 повт'},
+    {name:'Жим от груди лёжа/на полу', scheme:'3 подхода × 12 повт'},
+    {name:'Болгарские выпады', scheme:'3 подхода × 10 повт на ногу'},
+    {name:'Тяга к поясу', scheme:'3 подхода × 12 повт'},
+    {name:'Планка с подъёмом ноги', scheme:'3 подхода × 10 повт на сторону'},
+    {name:'Пресс велосипед', scheme:'3 подхода × 20 повт'},
+  ]
+};
+
+// today index: 0=Mon..6=Sun
+const jsDay = new Date().getDay();
+const todayIdx = jsDay === 0 ? 6 : jsDay - 1;
+let selectedIdx = todayIdx;
+
+// build calendar dates for this week (Mon..Sun)
+const today = new Date();
+const monday = new Date(today);
+monday.setDate(today.getDate() - todayIdx);
+const weekDates = WEEK.map((d, i) => {
+  const dt = new Date(monday);
+  dt.setDate(monday.getDate() + i);
+  return dt.getDate();
+});
+
+const dateStrip = document.getElementById('dateStrip');
+function renderDateStrip(){
+  dateStrip.innerHTML = '';
+  WEEK.forEach((d, i) => {
+    const c = document.createElement('div');
+    c.className = 'date-circle' + (i === selectedIdx ? ' selected' : '') + (i === todayIdx ? ' is-today' : '');
+    c.innerHTML = `<div class="date-num">${weekDates[i]}</div><div class="date-let">${d.short}</div>`;
+    c.addEventListener('click', () => { selectedIdx = i; renderAll(); });
+    dateStrip.appendChild(c);
+  });
+}
+
+const CONFETTI_COLORS = ['#111111', '#FF6B4A', '#FFC24B', '#4CAF8C', '#5B9CFF', '#7C6BFF'];
+
+function fireConfetti(x, y, count){
+  const canvas = document.createElement('canvas');
+  canvas.style.position = 'fixed';
+  canvas.style.left = '0';
+  canvas.style.top = '0';
+  canvas.style.width = '100vw';
+  canvas.style.height = '100vh';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '9999';
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+    const speed = 3 + Math.random() * 4;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2,
+      size: 4 + Math.random() * 4,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      rotation: Math.random() * Math.PI * 2,
+      vr: (Math.random() - 0.5) * 0.3,
+      life: 1,
+    });
+  }
+
+  let frame = 0;
+  function tick(){
+    frame++;
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    let alive = false;
+    particles.forEach(p => {
+      p.vy += 0.15;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.vr;
+      p.life -= 0.012;
+      if (p.life > 0) {
+        alive = true;
+        ctx.save();
+        ctx.globalAlpha = Math.max(p.life, 0);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+        ctx.restore();
+      }
+    });
+    if (alive && frame < 140) {
+      requestAnimationFrame(tick);
+    } else {
+      canvas.remove();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function fireConfettiFromElement(el, count){
+  const rect = el.getBoundingClientRect();
+  fireConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2, count);
+}
+
+function buildExercise(ex, onToggle){
+  const row = document.createElement('div');
+  row.className = 'ex-row';
+  const check = document.createElement('div');
+  check.className = 'ex-check';
+  check.innerHTML = CHECK_SVG;
+  const main = document.createElement('div');
+  main.className = 'ex-main';
+  main.innerHTML = `<div class="ex-name">${ex.name}</div><div class="ex-scheme">${ex.scheme}</div>`;
+  const nameEl = main.querySelector('.ex-name');
+  check.addEventListener('click', () => {
+    check.classList.toggle('checked');
+    nameEl.classList.toggle('done', check.classList.contains('checked'));
+    if (check.classList.contains('checked')) fireConfettiFromElement(check, 16);
+    if (onToggle) onToggle();
+  });
+  const weight = document.createElement('div');
+  weight.className = 'ex-weight';
+  weight.innerHTML = `<input type="number" placeholder="—" min="0"><span>кг</span>`;
+  row.appendChild(check);
+  row.appendChild(main);
+  row.appendChild(weight);
+  return row;
+}
+
+function buildStrengthCard(session, isOpenDefault){
+  const card = document.createElement('div');
+  card.className = 'card' + (isOpenDefault ? ' open' : '');
+
+  const head = document.createElement('div');
+  head.className = 'card-head';
+  head.innerHTML = `
+    <div class="card-icon">${ICONS.strength}</div>
+    <div class="card-text">
+      <div class="card-title">${session.title}</div>
+      <div class="card-sub">${session.sub}</div>
+    </div>
+  `;
+  const checkCircle = document.createElement('div');
+  checkCircle.className = 'check-circle';
+  checkCircle.innerHTML = CHECK_SVG;
+  head.appendChild(checkCircle);
+  head.addEventListener('click', (e) => {
+    if (e.target === checkCircle || checkCircle.contains(e.target)) return;
+    card.classList.toggle('open');
+  });
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  const exChecks = [];
+  function syncHeaderFromExercises(){
+    const allChecked = exChecks.length > 0 && exChecks.every(c => c.classList.contains('checked'));
+    const wasChecked = checkCircle.classList.contains('checked');
+    checkCircle.classList.toggle('checked', allChecked);
+    if (allChecked && !wasChecked) fireConfettiFromElement(checkCircle, 40);
+  }
+  checkCircle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const nowChecked = !checkCircle.classList.contains('checked');
+    checkCircle.classList.toggle('checked', nowChecked);
+    exChecks.forEach(c => {
+      c.classList.toggle('checked', nowChecked);
+      c.closest('.ex-row').querySelector('.ex-name').classList.toggle('done', nowChecked);
+    });
+    if (nowChecked) fireConfettiFromElement(checkCircle, 40);
+  });
+
+  session.exercises.forEach((ex, ei) => {
+    const row = buildExercise(ex, syncHeaderFromExercises);
+    exChecks.push(row.querySelector('.ex-check'));
+    body.appendChild(row);
+    if (ex.timer) {
+      const tRow = document.createElement('div');
+      tRow.className = 'timer-row';
+      const display = document.createElement('div');
+      display.className = 'timer-display';
+      display.textContent = formatTime(ex.timer);
+      let remaining = ex.timer, interval = null;
+      const btn = document.createElement('button');
+      btn.className = 'timer-btn';
+      btn.textContent = 'Старт';
+      btn.addEventListener('click', () => {
+        if (interval) {
+          clearInterval(interval); interval = null;
+          btn.textContent = 'Старт'; btn.classList.remove('running');
+          remaining = ex.timer; display.textContent = formatTime(remaining);
+          return;
+        }
+        btn.textContent = 'Стоп'; btn.classList.add('running');
+        interval = setInterval(() => {
+          remaining--;
+          display.textContent = formatTime(remaining);
+          if (remaining <= 0) {
+            clearInterval(interval); interval = null;
+            btn.textContent = 'Старт'; btn.classList.remove('running');
+            remaining = ex.timer; display.textContent = formatTime(remaining);
+          }
+        }, 1000);
+      });
+      tRow.appendChild(display);
+      tRow.appendChild(btn);
+      body.appendChild(tRow);
+    }
+  });
+
+  card.appendChild(head);
+  card.appendChild(body);
+  return card;
+}
+
+function buildSimpleCard(session){
+  const card = document.createElement('div');
+  card.className = 'card' + (session.type === 'rest' ? ' dim' : '');
+  const head = document.createElement('div');
+  head.className = 'card-head';
+  head.innerHTML = `
+    <div class="card-icon">${ICONS[session.type]}</div>
+    <div class="card-text">
+      <div class="card-title">${session.title}</div>
+      <div class="card-sub">${session.sub}</div>
+    </div>
+  `;
+  const checkCircle = document.createElement('div');
+  checkCircle.className = 'check-circle';
+  checkCircle.innerHTML = CHECK_SVG;
+  if (session.type !== 'rest') {
+    checkCircle.addEventListener('click', () => {
+      checkCircle.classList.toggle('checked');
+      if (checkCircle.classList.contains('checked')) fireConfettiFromElement(checkCircle, 40);
+    });
+  } else {
+    checkCircle.style.opacity = '0.4';
+    checkCircle.style.cursor = 'default';
+  }
+  head.appendChild(checkCircle);
+  card.appendChild(head);
+  return card;
+}
+
+function renderMainCard(){
+  const wrap = document.getElementById('mainCardWrap');
+  wrap.innerHTML = '';
+  const session = WEEK[selectedIdx];
+  const card = session.type === 'strength'
+    ? buildStrengthCard(session, true)
+    : buildSimpleCard(session);
+  wrap.appendChild(card);
+}
+
+function renderOptionalCard(){
+  const holder = document.getElementById('optionalCard');
+  const built = buildStrengthCard(OPTIONAL, false);
+  holder.replaceWith(built);
+  built.id = 'optionalCard';
+}
+
+function formatTime(s){
+  const m = Math.floor(s/60), sec = s%60;
+  return `${m}:${sec.toString().padStart(2,'0')}`;
+}
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.querySelectorAll('.ex-check.checked, .check-circle.checked').forEach(el => el.classList.remove('checked'));
+  document.querySelectorAll('.ex-name.done').forEach(el => el.classList.remove('done'));
+});
+
+function renderAll(){
+  renderDateStrip();
+  renderMainCard();
+}
+renderAll();
+renderOptionalCard();
+</script>
+
+</body>
+</html>
